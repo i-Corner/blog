@@ -2,18 +2,18 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>课程 on iC0rner</title>
-        <link>http://localhost:1313/categories/%E8%AF%BE%E7%A8%8B/</link>
+        <link>https://i-corner.github.io/categories/%E8%AF%BE%E7%A8%8B/</link>
         <description>Recent content in 课程 on iC0rner</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
         <copyright>Example Person</copyright>
-        <lastBuildDate>Fri, 18 Apr 2025 14:14:02 +0800</lastBuildDate><atom:link href="http://localhost:1313/categories/%E8%AF%BE%E7%A8%8B/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Fri, 18 Apr 2025 14:14:02 +0800</lastBuildDate><atom:link href="https://i-corner.github.io/categories/%E8%AF%BE%E7%A8%8B/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>栈溢出攻击</title>
-        <link>http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/</link>
+        <link>https://i-corner.github.io/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/</link>
         <pubDate>Fri, 18 Apr 2025 14:14:02 +0800</pubDate>
         
-        <guid>http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/</guid>
-        <description>&lt;img src="http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-7.png" alt="Featured image of post 栈溢出攻击" /&gt;&lt;h2 id=&#34;1栈溢出攻击实践&#34;&gt;1.栈溢出攻击实践
+        <guid>https://i-corner.github.io/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/</guid>
+        <description>&lt;img src="https://i-corner.github.io/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-7.png" alt="Featured image of post 栈溢出攻击" /&gt;&lt;h2 id=&#34;1栈溢出攻击实践&#34;&gt;1.栈溢出攻击实践
 &lt;/h2&gt;&lt;h3 id=&#34;11-实验环境&#34;&gt;1.1 实验环境
 &lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;操作系统：虚拟机 Ubuntu 16.04 LTS&lt;/li&gt;
@@ -63,10 +63,10 @@
 &lt;code&gt;gcc vuln.c  -fno-stack-protector  -no-pie -o vuln&lt;/code&gt;&lt;/p&gt;
 &lt;h4 id=&#34;122-ida分析漏洞程序&#34;&gt;1.2.2 IDA分析漏洞程序
 &lt;/h4&gt;&lt;p&gt;将程序移进IDA进行反编译分析
-&lt;img src=&#34;http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-7.png&#34;
+&lt;img src=&#34;https://i-corner.github.io/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-7.png&#34;
 	width=&#34;1130&#34;
 	height=&#34;393&#34;
-	srcset=&#34;http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-7_hu_623c6126ff3b111d.png 480w, http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-7_hu_3c2cd1a410b2b06a.png 1024w&#34;
+	srcset=&#34;https://i-corner.github.io/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-7_hu_623c6126ff3b111d.png 480w, https://i-corner.github.io/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-7_hu_3c2cd1a410b2b06a.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;alt text&#34;
@@ -79,10 +79,10 @@
 &gt;
 IDA给出所有函数的地址以及反编译内容
 再进入main函数的v4变量，即源代码中buffer变量缓冲区
-&lt;img src=&#34;http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-1.png&#34;
+&lt;img src=&#34;https://i-corner.github.io/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-1.png&#34;
 	width=&#34;716&#34;
 	height=&#34;202&#34;
-	srcset=&#34;http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-1_hu_fb45d5e83be86252.png 480w, http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-1_hu_b243427dcfa45e3e.png 1024w&#34;
+	srcset=&#34;https://i-corner.github.io/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-1_hu_fb45d5e83be86252.png 480w, https://i-corner.github.io/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-1_hu_b243427dcfa45e3e.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;alt text&#34;
@@ -131,10 +131,10 @@ IDA给出所有函数的地址以及反编译内容
 &lt;/div&gt;
 &lt;/div&gt;&lt;h4 id=&#34;124-攻击&#34;&gt;1.2.4 攻击
 &lt;/h4&gt;&lt;h5 id=&#34;1241-攻击效果&#34;&gt;1.2.4.1 攻击效果
-&lt;/h5&gt;&lt;p&gt;&lt;img src=&#34;http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-3.png&#34;
+&lt;/h5&gt;&lt;p&gt;&lt;img src=&#34;https://i-corner.github.io/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-3.png&#34;
 	width=&#34;727&#34;
 	height=&#34;407&#34;
-	srcset=&#34;http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-3_hu_82db4c8a9e54b420.png 480w, http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-3_hu_1418baee1f1689ca.png 1024w&#34;
+	srcset=&#34;https://i-corner.github.io/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-3_hu_82db4c8a9e54b420.png 480w, https://i-corner.github.io/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-3_hu_1418baee1f1689ca.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;alt text&#34;
@@ -152,10 +152,10 @@ IDA给出所有函数的地址以及反编译内容
 &lt;/h5&gt;&lt;p&gt;此处交由GDB调试来具体展示过程
 由于需要完成栈溢出攻击并跳转到自定义函数，因此是需要控制程序执行流
 在此处只能够在main函数结束时完成攻击
-&lt;img src=&#34;http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-6.png&#34;
+&lt;img src=&#34;https://i-corner.github.io/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-6.png&#34;
 	width=&#34;757&#34;
 	height=&#34;316&#34;
-	srcset=&#34;http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-6_hu_50fb2e5f1a38a459.png 480w, http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-6_hu_a3765152cd08a378.png 1024w&#34;
+	srcset=&#34;https://i-corner.github.io/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-6_hu_50fb2e5f1a38a459.png 480w, https://i-corner.github.io/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-6_hu_a3765152cd08a378.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;alt text&#34;
@@ -168,10 +168,10 @@ IDA给出所有函数的地址以及反编译内容
 &gt;
 因此在main函数的retn返回处下断点
 &lt;strong&gt;正常程序&lt;/strong&gt;
-&lt;img src=&#34;http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-5.png&#34;
+&lt;img src=&#34;https://i-corner.github.io/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-5.png&#34;
 	width=&#34;889&#34;
 	height=&#34;226&#34;
-	srcset=&#34;http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-5_hu_464f0e34791f450f.png 480w, http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-5_hu_54c24001109addc4.png 1024w&#34;
+	srcset=&#34;https://i-corner.github.io/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-5_hu_464f0e34791f450f.png 480w, https://i-corner.github.io/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-5_hu_54c24001109addc4.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;alt text&#34;
@@ -184,10 +184,10 @@ IDA给出所有函数的地址以及反编译内容
 &gt;
 正常程序下，程序执行到retn处，返回到调用main函数的地址(__libc_start_main+176)，即程序结束&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;攻击程序&lt;/strong&gt;
-&lt;img src=&#34;http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-4.png&#34;
+&lt;img src=&#34;https://i-corner.github.io/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-4.png&#34;
 	width=&#34;730&#34;
 	height=&#34;320&#34;
-	srcset=&#34;http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-4_hu_a3aa0a01c7e22554.png 480w, http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-4_hu_a3dba4de86747af5.png 1024w&#34;
+	srcset=&#34;https://i-corner.github.io/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-4_hu_a3aa0a01c7e22554.png 480w, https://i-corner.github.io/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-4_hu_a3dba4de86747af5.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;alt text&#34;
@@ -205,10 +205,10 @@ IDA给出所有函数的地址以及反编译内容
 &lt;/h4&gt;&lt;h5 id=&#34;211-问题背景&#34;&gt;2.1.1 问题背景
 &lt;/h5&gt;&lt;p&gt;传统的堆栈缓冲区溢出攻击（尤其是利用返回地址篡改实现的后向控制流劫持）长期以来一直是软件攻击的一个关键点。为了防范这类攻击，学术界和工业界提出了多种后向保护机制，例如栈保护(canaries)和影子栈(shadow stacks)。这些防护措施的基本假设是：攻击者必须直接篡改返回地址才能劫持控制流，从而可以通过检测返回时的数据完整性来防御攻击。&lt;/p&gt;
 &lt;h5 id=&#34;212-动机&#34;&gt;2.1.2 动机
-&lt;/h5&gt;&lt;p&gt;&lt;img src=&#34;http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-8.png&#34;
+&lt;/h5&gt;&lt;p&gt;&lt;img src=&#34;https://i-corner.github.io/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-8.png&#34;
 	width=&#34;448&#34;
 	height=&#34;111&#34;
-	srcset=&#34;http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-8_hu_1c237bab215f1ed1.png 480w, http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-8_hu_1f6dc268fd102de3.png 1024w&#34;
+	srcset=&#34;https://i-corner.github.io/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-8_hu_1c237bab215f1ed1.png 480w, https://i-corner.github.io/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-8_hu_1f6dc268fd102de3.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;传统防御方案的不足&#34;
@@ -238,10 +238,10 @@ IDA给出所有函数的地址以及反编译内容
 &lt;h4 id=&#34;222-动机&#34;&gt;2.2.2 动机
 &lt;/h4&gt;&lt;p&gt;现有的安全机制在设计上过于保守，将大量对象归类为“不安全”，从而不得不牺牲较多不必要的操作以对这些对象进行保护；同时，部分防御仅仅能保护返回地址，而无法全面防护堆栈上的所有数据对象。论文的目标在于如何能够更精确地验证哪些堆栈对象真正安全，从而将这些对象隔离到“安全堆栈”中，以阻断各种内存错误的利用，同时降低运行时开销。&lt;/p&gt;
 &lt;h4 id=&#34;223-论文方案设计&#34;&gt;2.2.3 论文方案设计
-&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-9.png&#34;
+&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;https://i-corner.github.io/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-9.png&#34;
 	width=&#34;554&#34;
 	height=&#34;110&#34;
-	srcset=&#34;http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-9_hu_41b88fb05db0083f.png 480w, http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-9_hu_2ad3940b439b63e6.png 1024w&#34;
+	srcset=&#34;https://i-corner.github.io/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-9_hu_41b88fb05db0083f.png 480w, https://i-corner.github.io/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-9_hu_2ad3940b439b63e6.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;防御方案&#34;
