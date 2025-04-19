@@ -22,11 +22,11 @@ languages:
                 subtitle: Example description
     zh-cn:
         languageName: 中文
-        title: 演示站点
+        title: iC0rner
         weight: 2
         params:
             sidebar:
-                subtitle: 演示说明
+                subtitle: 这个人很懒
     ar:
         languageName: عربي
         languagedirection: rtl
@@ -56,7 +56,7 @@ params:
         - post
     featuredImageField: image
     rssFullContent: true
-    favicon: # e.g.: favicon placed in `static/favicon.ico` of your site folder, then set this field to `/favicon.ico` (`/` is necessary)
+    favicon: favicon.ico # e.g.: favicon placed in `static/favicon.ico` of your site folder, then set this field to `/favicon.ico` (`/` is necessary)
 
     footer:
         since: 2020
@@ -67,12 +67,12 @@ params:
         lastUpdated: Jan 02, 2006 15:04 MST
 
     sidebar:
-        emoji: 🍥
+        emoji: 
         subtitle: Lorem ipsum dolor sit amet, consectetur adipiscing elit.
         avatar:
             enabled: true
-            local: true
-            src: img/avatar.png
+            local: false
+            src: https://avatars.githubusercontent.com/u/80880063?v=4
 
     article:
         math: false

