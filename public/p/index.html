@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="涉及的漏洞应用和CVE\rXpdf CVE-2019-13288\n总结\rdocker 网页gui环境搭建 AFL++基础使用，编译插桩和运行fuzz 使用gdb进行crash追踪和分析 读前告知\r环境及一些路径问题笔者并不一定完全描述清楚，请读者自行检索解决 记住，好记性不如烂笔头！多多实践！\n">
+<title></title>
+
+<link rel='canonical' href='http://localhost:1313/p/'>
+
+<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="">
+<meta property='og:description' content="涉及的漏洞应用和CVE\rXpdf CVE-2019-13288\n总结\rdocker 网页gui环境搭建 AFL++基础使用，编译插桩和运行fuzz 使用gdb进行crash追踪和分析 读前告知\r环境及一些路径问题笔者并不一定完全描述清楚，请读者自行检索解决 记住，好记性不如烂笔头！多多实践！\n">
+<meta property='og:url' content='http://localhost:1313/p/'>
+<meta property='og:site_name' content='iC0rner'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' />
+<meta name="twitter:title" content="">
+<meta name="twitter:description" content="涉及的漏洞应用和CVE\rXpdf CVE-2019-13288\n总结\rdocker 网页gui环境搭建 AFL++基础使用，编译插桩和运行fuzz 使用gdb进行crash追踪和分析 读前告知\r环境及一些路径问题笔者并不一定完全描述清楚，请读者自行检索解决 记住，好记性不如烂笔头！多多实践！\n">
+    <link rel="shortcut icon" href="/favicon.ico" />
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    <img src="https://avatars.githubusercontent.com/u/80880063?v=4" width="300" height="300" class="site-logo" loading="lazy" alt="Avatar">
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">iC0rner</a></h1>
+            <h2 class="site-description">这个人很懒</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/CaiJimmy/hugo-theme-stack'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com'
+                        target="_blank"
+                        title="Twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="http://localhost:1313/en/" >English</option>
+                                
+                                    <option value="http://localhost:1313/" selected>中文</option>
+                                
+                                    <option value="http://localhost:1313/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li>
+      <ol>
+        <li><a href="#涉及的漏洞应用和cve">涉及的漏洞应用和CVE</a></li>
+        <li><a href="#总结">总结</a></li>
+        <li><a href="#读前告知">读前告知</a></li>
+        <li><a href="#环境准备">环境准备</a>
+          <ol>
+            <li><a href="#基础系统">基础系统</a></li>
+            <li><a href="#麻烦事情">麻烦事情</a></li>
+            <li><a href="#构建xpdf">构建xpdf</a></li>
+            <li><a href="#测试xpdf">测试xpdf</a></li>
+            <li><a href="#打开pdf及测试">打开pdf及测试</a></li>
+            <li><a href="#afl安装">AFL安装</a></li>
+          </ol>
+        </li>
+        <li><a href="#afl编译xpdf">AFL编译xpdf</a></li>
+        <li><a href="#运行fuzz">运行fuzz</a></li>
+        <li><a href="#练习题">练习题</a>
+          <ol>
+            <li><a href="#重现crash">重现crash</a></li>
+            <li><a href="#调试crash以找到问题所在的地方">调试crash以找到问题所在的地方</a></li>
+            <li><a href="#修复问题">修复问题</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/"></a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 4 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h3 id="涉及的漏洞应用和cve">涉及的漏洞应用和CVE
+</h3><p><strong>Xpdf</strong>
+<strong>CVE-2019-13288</strong></p>
+<h3 id="总结">总结
+</h3><ol>
+<li>docker 网页gui环境搭建</li>
+<li>AFL++基础使用，编译插桩和运行fuzz</li>
+<li>使用gdb进行crash追踪和分析</li>
+</ol>
+<h3 id="读前告知">读前告知
+</h3><p>环境及一些路径问题笔者并不一定完全描述清楚，请读者自行检索解决
+记住，好记性不如烂笔头！多多实践！</p>
+<h3 id="环境准备">环境准备
+</h3><h4 id="基础系统">基础系统
+</h4><p>笔者较懒且喜欢gui，还有一个问题就是<strong>虚拟机开的太久有时会自己卡死</strong>，而fuzz的过程总是漫长的，于是使用<code>windows+docker+kasmweb</code>的方式使用，即网页版Ubuntu
+windows需要先安装WSL和docker desktop，再找到core-ubuntu-focal的镜像进行下载</p>
+<p>原就为Linux的读者完全可以接着往下看</p>
+<p><img src="/p/Pasted_image_20250419142022.png"
+	width="1518"
+	height="445"
+	srcset="/p/Pasted_image_20250419142022_hu_8473eb079451691f.png 480w, /p/Pasted_image_20250419142022_hu_7845e4ba48e732c0.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="341"
+		data-flex-basis="818px"
+	
+></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">docker run -d --name fuzz_course --shm-size<span class="o">=</span>512m -p 6901:6901 -e <span class="nv">VNC_PW</span><span class="o">=</span><span class="m">123456</span> -u root --privileged kasmweb/core-ubuntu-focal:x86_64-1.16.0-rolling-daily
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="麻烦事情">麻烦事情
+</h4><p>由于为docker老镜像，大部分底层依赖等都没有更新，所以这里需要
+换源apt-update、gcc、llvm、python、pip等底层依赖升级
+（此处可以结合AFL安装的前置条件一同完成）</p>
+<h4 id="构建xpdf">构建xpdf
+</h4><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="nb">cd</span> <span class="nv">$HOME</span>
+</span></span><span class="line"><span class="cl">mkdir fuzzing_xpdf <span class="o">&amp;&amp;</span> <span class="nb">cd</span> fuzzing_xpdf/
+</span></span><span class="line"><span class="cl">wget https://dl.xpdfreader.com/old/xpdf-3.02.tar.gz
+</span></span><span class="line"><span class="cl">tar -xvzf xpdf-3.02.tar.gz
+</span></span><span class="line"><span class="cl"><span class="nb">cd</span> xpdf-3.02
+</span></span><span class="line"><span class="cl">sudo apt update <span class="o">&amp;&amp;</span> sudo apt install -y build-essential gcc
+</span></span><span class="line"><span class="cl">./configure --prefix<span class="o">=</span><span class="s2">&#34;</span><span class="nv">$HOME</span><span class="s2">/fuzzing_xpdf/install/&#34;</span>
+</span></span><span class="line"><span class="cl">make
+</span></span><span class="line"><span class="cl">make install
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="测试xpdf">测试xpdf
+</h4><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="nb">cd</span> <span class="nv">$HOME</span>/fuzzing_xpdf
+</span></span><span class="line"><span class="cl">mkdir pdf_examples <span class="o">&amp;&amp;</span> <span class="nb">cd</span> pdf_examples
+</span></span><span class="line"><span class="cl">wget https://github.com/mozilla/pdf.js-sample-files/raw/master/helloworld.pdf
+</span></span><span class="line"><span class="cl">wget http://www.africau.edu/images/default/sample.pdf
+</span></span><span class="line"><span class="cl">wget https://www.melbpc.org.au/wp-content/uploads/2017/10/small-example-pdf-file.pdf
+</span></span><span class="line"><span class="cl"><span class="nv">$HOME</span>/fuzzing_xpdf/install/bin/pdfinfo -box -meta <span class="nv">$HOME</span>/fuzzing_xpdf/pdf_examples/helloworld.pdf
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="打开pdf及测试">打开pdf及测试
+</h4><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="nv">$HOME</span>/fuzzing_xpdf/install/bin/pdfinfo -box -meta <span class="nv">$HOME</span>/fuzzing_xpdf/pdf_examples/helloworld.pdf
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><img src="/p/Pasted_image_20250419162011.png"
+	width="914"
+	height="295"
+	srcset="/p/Pasted_image_20250419162011_hu_782b003f194cf58e.png 480w, /p/Pasted_image_20250419162011_hu_dbcf975d9c006fa0.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="309"
+		data-flex-basis="743px"
+	
+></p>
+<h4 id="afl安装">AFL安装
+</h4><p><a class="link" href="https://github.com/AFLplusplus/AFLplusplus/blob/stable/docs/INSTALL.md"  target="_blank" rel="noopener"
+    >https://github.com/AFLplusplus/AFLplusplus/blob/stable/docs/INSTALL.md</a></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">sudo apt-get update
+</span></span><span class="line"><span class="cl">sudo apt-get install -y build-essential python3-dev automake cmake git flex bison libglib2.0-dev libpixman-1-dev python3-setuptools cargo libgtk-3-dev
+</span></span><span class="line"><span class="cl"><span class="c1"># try to install llvm 14 and install the distro default if that fails</span>
+</span></span><span class="line"><span class="cl">sudo apt-get install -y lld-14 llvm-14 llvm-14-dev clang-14 <span class="o">||</span> sudo apt-get install -y lld llvm llvm-dev clang
+</span></span><span class="line"><span class="cl">sudo apt-get install -y gcc-<span class="k">$(</span>gcc --version<span class="p">|</span>head -n1<span class="p">|</span>sed <span class="s1">&#39;s/\..*//&#39;</span><span class="p">|</span>sed <span class="s1">&#39;s/.* //&#39;</span><span class="k">)</span>-plugin-dev libstdc++-<span class="k">$(</span>gcc --version<span class="p">|</span>head -n1<span class="p">|</span>sed <span class="s1">&#39;s/\..*//&#39;</span><span class="p">|</span>sed <span class="s1">&#39;s/.* //&#39;</span><span class="k">)</span>-dev
+</span></span><span class="line"><span class="cl">sudo apt-get install -y ninja-build <span class="c1"># for QEMU mode</span>
+</span></span><span class="line"><span class="cl">sudo apt-get install -y cpio libcapstone-dev <span class="c1"># for Nyx mode</span>
+</span></span><span class="line"><span class="cl">sudo apt-get install -y wget curl <span class="c1"># for Frida mode</span>
+</span></span><span class="line"><span class="cl">sudo apt-get install -y python3-pip <span class="c1"># for Unicorn mode</span>
+</span></span><span class="line"><span class="cl">git clone https://github.com/AFLplusplus/AFLplusplus
+</span></span><span class="line"><span class="cl"><span class="nb">cd</span> AFLplusplus
+</span></span><span class="line"><span class="cl">make distrib
+</span></span><span class="line"><span class="cl">sudo make install
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Tips:lld、llvm底层依赖Ubuntu20.04 不一定能直接装到14版本，可以选择装13的，gcc同理</p>
+<h3 id="afl编译xpdf">AFL编译xpdf
+</h3><p>删除之前的编译文件</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">rm -r <span class="nv">$HOME</span>/fuzzing_xpdf/install
+</span></span><span class="line"><span class="cl"><span class="nb">cd</span> 原安装包位置
+</span></span><span class="line"><span class="cl">make clean
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>使用<strong>afl-clang-fast 编译</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LLVM_CONFIG</span><span class="o">=</span><span class="s2">&#34;llvm-config-13&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nv">CC</span><span class="o">=</span><span class="nv">$HOME</span>/AFLplusplus/afl-clang-fast <span class="nv">CXX</span><span class="o">=</span><span class="nv">$HOME</span>/AFLplusplus/afl-clang-fast++ ./configure --prefix<span class="o">=</span><span class="s2">&#34;</span><span class="nv">$HOME</span><span class="s2">/fuzzing_xpdf/install/&#34;</span>
+</span></span><span class="line"><span class="cl">make
+</span></span><span class="line"><span class="cl">make install
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="运行fuzz">运行fuzz
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">afl-fuzz -i <span class="nv">$HOME</span>/fuzzing_xpdf/pdf_examples/ -o <span class="nv">$HOME</span>/fuzzing_xpdf/out/ -s <span class="m">123</span> -- <span class="nv">$HOME</span>/fuzzing_xpdf/install/bin/pdftotext @@ <span class="nv">$HOME</span>/fuzzing_xpdf/output
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><em>-i</em> indicates the directory where we have to put the input cases (a.k.a file examples)<br>
+-i 表示我们需要放置输入案例（即文件示例）的目录</li>
+<li><em>-o</em> indicates the directory where AFL++ will store the mutated files<br>
+-o 表示 AFL++ 将存储突变文件的目录</li>
+<li><em>-s</em> indicates the static random seed to use<br>
+-s 表示要使用的静态随机种子</li>
+<li><em>@@</em> is the placeholder target&rsquo;s command line that AFL will substitute with each input file name<br>
+@@是 AFL 将替换为每个输入文件名的目标命令行占位符</li>
+</ul>
+<p>因此，基本上 fuzzer 将会运行这个命令<code>$HOME/fuzzing_xpdf/install/bin/pdftotext &lt;input-file-name&gt; $HOME/fuzzing_xpdf/output</code> 对每个不同的输入文件</p>
+<p><strong>Tips</strong>：使用docker时需要额外使用<code>echo core &gt; /proc/sys/kernel/core_pattern</code>，是因为如果系统配置为将核心转储文件（core）通知发送到外部程序，将导致将崩溃信息发送到Fuzzer之间的延迟增大，进而可能将崩溃被误报为超时，所以得临时修改<code>core_pattern</code>文件，这也是为何构建容器时使用<code>--privileged</code>方便改写系统文件</p>
+<p><img src="/p/Pasted_image_20250419182502.png"
+	width="872"
+	height="522"
+	srcset="/p/Pasted_image_20250419182502_hu_aea58a56804d38ef.png 480w, /p/Pasted_image_20250419182502_hu_4db2d08512ddb01.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="167"
+		data-flex-basis="400px"
+	
+>
+静待一段时间，等到出现crash
+<img src="/p/Pasted_image_20250419184614.png"
+	width="895"
+	height="539"
+	srcset="/p/Pasted_image_20250419184614_hu_5df131b5b3cd2fae.png 480w, /p/Pasted_image_20250419184614_hu_86d0afeedf52c8ee.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="166"
+		data-flex-basis="398px"
+	
+></p>
+<h3 id="练习题">练习题
+</h3><h4 id="重现crash">重现crash
+</h4><p>先找到我们crash的文件所在地
+<code>$HOME/fuzzing_xpdf/install/bin/pdftotext  ./out/default/crashes/id\:000000\,sig\:11\,src\:000002\,time\:348479\,execs\:218044\,op\:havoc\,rep\:15</code>
+执行我们引起crash的输入
+<img src="/p/Pasted_image_20250421200243.png"
+	width="889"
+	height="106"
+	srcset="/p/Pasted_image_20250421200243_hu_c2924ce818181a7a.png 480w, /p/Pasted_image_20250421200243_hu_d36aa497b31af639.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="838"
+		data-flex-basis="2012px"
+	
+></p>
+<h4 id="调试crash以找到问题所在的地方">调试crash以找到问题所在的地方
+</h4><p>进入gdb（推荐可以使用pwngdb，但要注意寻找兼容Ubuntu20.04版本的）
+输入我们的crash，注意不要使用<code>&lt;</code>管道定向，保持源二进制文件的执行</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">pwndbg&gt; run  ./out/default/crashes/id\:000000\,sig\:11\,src\:000002\,time\:348479\,execs\:218044\,op\:havoc\,rep\:15
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>尝试输入<code>bt</code>发现栈追踪无限增长，<del><strong>不能定位，于是另寻它路</strong></del></p>
+<p><strong>好吧，实际上这就是漏洞（无限递归）所在</strong></p>
+<p><img src="/p/Pasted_image_20250421201349.png"
+	width="1102"
+	height="568"
+	srcset="/p/Pasted_image_20250421201349_hu_2185e90c282aba7a.png 480w, /p/Pasted_image_20250421201349_hu_cded6dde6672ea8.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="194"
+		data-flex-basis="465px"
+	
+></p>
+<p><a class="link" href="https://www.cvedetails.com/cve/CVE-2019-13288/"  target="_blank" rel="noopener"
+    >https://www.cvedetails.com/cve/CVE-2019-13288/</a>
+<img src="/p/Pasted_image_20250421201500.png"
+	width="898"
+	height="218"
+	srcset="/p/Pasted_image_20250421201500_hu_41483d883cc550ef.png 480w, /p/Pasted_image_20250421201500_hu_54cbbad01e214979.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="411"
+		data-flex-basis="988px"
+	
+></p>
+<h4 id="修复问题">修复问题
+</h4><p>通过bt直接定位到Parser.cc文件
+结合源码可以得知，是makestream后的shift函数又调用了getOBJ，而getobj又可以makestream，造成了三角循环，无限递归，导致报错</p>
+<p><img src="/p/Pasted_image_20250421210028.png"
+	width="280"
+	height="87"
+	srcset="/p/Pasted_image_20250421210028_hu_ec89d75ba2fb09df.png 480w, /p/Pasted_image_20250421210028_hu_f1a3f12c540a0f4d.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="321"
+		data-flex-basis="772px"
+	
+>
+最简单粗暴的方法就是修改掉三角循环中的一角，重新make就不会触发漏洞，但是需要考虑当原本程序执行逻辑恰当！！！</p>
+<p>实际xpdf在4.02以后增加了递归次数的限制
+在会导致该三角循环的地方，增加了循环次数判断
+<a class="link" href="https://github.com/ashutoshvarma/libxpdf/blob/master/xpdf-4.02/xpdf/Parser.cc"  target="_blank" rel="noopener"
+    >https://github.com/ashutoshvarma/libxpdf/blob/master/xpdf-4.02/xpdf/Parser.cc</a>
+<img src="/p/Pasted_image_20250421211011.png"
+	width="514"
+	height="75"
+	srcset="/p/Pasted_image_20250421211011_hu_d8d84ce8c81500d9.png 480w, /p/Pasted_image_20250421211011_hu_5c65873394b4966e.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="685"
+		data-flex-basis="1644px"
+	
+>
+<img src="/p/Pasted_image_20250421211122.png"
+	width="545"
+	height="136"
+	srcset="/p/Pasted_image_20250421211122_hu_6ce7eded6047fb5d.png 480w, /p/Pasted_image_20250421211122_hu_6b45eaee9e46f0a.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="400"
+		data-flex-basis="961px"
+	
+></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2025 Example Person
+    </section>
+    
+    <section class="powerby">
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.8d9d34331f49d5a6743aab830fac503fd73b3eb1ce23d01677f3d7c7ac69fd79.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

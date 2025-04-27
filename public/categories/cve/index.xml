@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>CVE on iC0rner</title>
+        <link>http://localhost:1313/categories/cve/</link>
+        <description>Recent content in CVE on iC0rner</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>zh-cn</language>
+        <copyright>Example Person</copyright>
+        <lastBuildDate>Sun, 27 Apr 2025 10:52:05 +0800</lastBuildDate><atom:link href="http://localhost:1313/categories/cve/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Fuzz101_1</title>
+        <link>http://localhost:1313/p/fuzz101_1/</link>
+        <pubDate>Sun, 27 Apr 2025 10:52:05 +0800</pubDate>
+        
+        <guid>http://localhost:1313/p/fuzz101_1/</guid>
+        <description>&lt;img src="http://localhost:1313/p/fuzz101_1/Pasted%20image%2020250419184614.png" alt="Featured image of post Fuzz101_1" /&gt;&lt;h3 id=&#34;涉及的漏洞应用和cve&#34;&gt;涉及的漏洞应用和CVE
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;Xpdf&lt;/strong&gt;
+&lt;strong&gt;CVE-2019-13288&lt;/strong&gt;&lt;/p&gt;
+&lt;h3 id=&#34;总结&#34;&gt;总结
+&lt;/h3&gt;&lt;ol&gt;
+&lt;li&gt;docker 网页gui环境搭建&lt;/li&gt;
+&lt;li&gt;AFL++基础使用，编译插桩和运行fuzz&lt;/li&gt;
+&lt;li&gt;使用gdb进行crash追踪和分析&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;读前告知&#34;&gt;读前告知
+&lt;/h3&gt;&lt;p&gt;环境及一些路径问题笔者并不一定完全描述清楚，请读者自行检索解决
+记住，好记性不如烂笔头！多多实践！&lt;/p&gt;
+&lt;h3 id=&#34;环境准备&#34;&gt;环境准备
+&lt;/h3&gt;&lt;h4 id=&#34;基础系统&#34;&gt;基础系统
+&lt;/h4&gt;&lt;p&gt;笔者较懒且喜欢gui，还有一个问题就是&lt;strong&gt;虚拟机开的太久有时会自己卡死&lt;/strong&gt;，而fuzz的过程总是漫长的，于是使用&lt;code&gt;windows+docker+kasmweb&lt;/code&gt;的方式使用，即网页版Ubuntu
+windows需要先安装WSL和docker desktop，再找到core-ubuntu-focal的镜像进行下载&lt;/p&gt;
+&lt;p&gt;原就为Linux的读者完全可以接着往下看&lt;/p&gt;
+&lt;p&gt;![[Pasted image 20250419142022.png]]&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;docker run -d --name fuzz_course --shm-size&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;512m -p 6901:6901 -e &lt;span class=&#34;nv&#34;&gt;VNC_PW&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;123456&lt;/span&gt; -u root --privileged kasmweb/core-ubuntu-focal:x86_64-1.16.0-rolling-daily
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h4 id=&#34;麻烦事情&#34;&gt;麻烦事情
+&lt;/h4&gt;&lt;p&gt;由于为docker老镜像，大部分底层依赖等都没有更新，所以这里需要
+换源apt-update、gcc、llvm、python、pip等底层依赖升级
+（此处可以结合AFL安装的前置条件一同完成）&lt;/p&gt;
+&lt;h4 id=&#34;构建xpdf&#34;&gt;构建xpdf
+&lt;/h4&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;9
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nb&#34;&gt;cd&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$HOME&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;mkdir fuzzing_xpdf &lt;span class=&#34;o&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;cd&lt;/span&gt; fuzzing_xpdf/
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;wget https://dl.xpdfreader.com/old/xpdf-3.02.tar.gz
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;tar -xvzf xpdf-3.02.tar.gz
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nb&#34;&gt;cd&lt;/span&gt; xpdf-3.02
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo apt update &lt;span class=&#34;o&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; sudo apt install -y build-essential gcc
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;./configure --prefix&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$HOME&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;/fuzzing_xpdf/install/&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;make
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;make install
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h4 id=&#34;测试xpdf&#34;&gt;测试xpdf
+&lt;/h4&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nb&#34;&gt;cd&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$HOME&lt;/span&gt;/fuzzing_xpdf
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;mkdir pdf_examples &lt;span class=&#34;o&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;cd&lt;/span&gt; pdf_examples
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;wget https://github.com/mozilla/pdf.js-sample-files/raw/master/helloworld.pdf
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;wget http://www.africau.edu/images/default/sample.pdf
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;wget https://www.melbpc.org.au/wp-content/uploads/2017/10/small-example-pdf-file.pdf
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nv&#34;&gt;$HOME&lt;/span&gt;/fuzzing_xpdf/install/bin/pdfinfo -box -meta &lt;span class=&#34;nv&#34;&gt;$HOME&lt;/span&gt;/fuzzing_xpdf/pdf_examples/helloworld.pdf
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h4 id=&#34;打开pdf及测试&#34;&gt;打开pdf及测试
+&lt;/h4&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nv&#34;&gt;$HOME&lt;/span&gt;/fuzzing_xpdf/install/bin/pdfinfo -box -meta &lt;span class=&#34;nv&#34;&gt;$HOME&lt;/span&gt;/fuzzing_xpdf/pdf_examples/helloworld.pdf
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;![[Pasted image 20250419162011.png]]&lt;/p&gt;
+&lt;h4 id=&#34;afl安装&#34;&gt;AFL安装
+&lt;/h4&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/AFLplusplus/AFLplusplus/blob/stable/docs/INSTALL.md&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://github.com/AFLplusplus/AFLplusplus/blob/stable/docs/INSTALL.md&lt;/a&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo apt-get update
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo apt-get install -y build-essential python3-dev automake cmake git flex bison libglib2.0-dev libpixman-1-dev python3-setuptools cargo libgtk-3-dev
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# try to install llvm 14 and install the distro default if that fails&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo apt-get install -y lld-14 llvm-14 llvm-14-dev clang-14 &lt;span class=&#34;o&#34;&gt;||&lt;/span&gt; sudo apt-get install -y lld llvm llvm-dev clang
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo apt-get install -y gcc-&lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;gcc --version&lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;head -n1&lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;sed &lt;span class=&#34;s1&#34;&gt;&amp;#39;s/\..*//&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;sed &lt;span class=&#34;s1&#34;&gt;&amp;#39;s/.* //&amp;#39;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt;-plugin-dev libstdc++-&lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;gcc --version&lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;head -n1&lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;sed &lt;span class=&#34;s1&#34;&gt;&amp;#39;s/\..*//&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;sed &lt;span class=&#34;s1&#34;&gt;&amp;#39;s/.* //&amp;#39;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt;-dev
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo apt-get install -y ninja-build &lt;span class=&#34;c1&#34;&gt;# for QEMU mode&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo apt-get install -y cpio libcapstone-dev &lt;span class=&#34;c1&#34;&gt;# for Nyx mode&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo apt-get install -y wget curl &lt;span class=&#34;c1&#34;&gt;# for Frida mode&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo apt-get install -y python3-pip &lt;span class=&#34;c1&#34;&gt;# for Unicorn mode&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git clone https://github.com/AFLplusplus/AFLplusplus
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nb&#34;&gt;cd&lt;/span&gt; AFLplusplus
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;make distrib
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sudo make install
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Tips:lld、llvm底层依赖Ubuntu20.04 不一定能直接装到14版本，可以选择装13的，gcc同理&lt;/p&gt;
+&lt;h3 id=&#34;afl编译xpdf&#34;&gt;AFL编译xpdf
+&lt;/h3&gt;&lt;p&gt;删除之前的编译文件&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;rm -r &lt;span class=&#34;nv&#34;&gt;$HOME&lt;/span&gt;/fuzzing_xpdf/install
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nb&#34;&gt;cd&lt;/span&gt; 原安装包位置
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;make clean
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;使用&lt;strong&gt;afl-clang-fast 编译&lt;/strong&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nb&#34;&gt;export&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;LLVM_CONFIG&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;llvm-config-13&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nv&#34;&gt;CC&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$HOME&lt;/span&gt;/AFLplusplus/afl-clang-fast &lt;span class=&#34;nv&#34;&gt;CXX&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$HOME&lt;/span&gt;/AFLplusplus/afl-clang-fast++ ./configure --prefix&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$HOME&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;/fuzzing_xpdf/install/&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;make
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;make install
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id=&#34;运行fuzz&#34;&gt;运行fuzz
+&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;afl-fuzz -i &lt;span class=&#34;nv&#34;&gt;$HOME&lt;/span&gt;/fuzzing_xpdf/pdf_examples/ -o &lt;span class=&#34;nv&#34;&gt;$HOME&lt;/span&gt;/fuzzing_xpdf/out/ -s &lt;span class=&#34;m&#34;&gt;123&lt;/span&gt; -- &lt;span class=&#34;nv&#34;&gt;$HOME&lt;/span&gt;/fuzzing_xpdf/install/bin/pdftotext @@ &lt;span class=&#34;nv&#34;&gt;$HOME&lt;/span&gt;/fuzzing_xpdf/output
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;em&gt;-i&lt;/em&gt; indicates the directory where we have to put the input cases (a.k.a file examples)&lt;br&gt;
+-i 表示我们需要放置输入案例（即文件示例）的目录&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;-o&lt;/em&gt; indicates the directory where AFL++ will store the mutated files&lt;br&gt;
+-o 表示 AFL++ 将存储突变文件的目录&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;-s&lt;/em&gt; indicates the static random seed to use&lt;br&gt;
+-s 表示要使用的静态随机种子&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;@@&lt;/em&gt; is the placeholder target&amp;rsquo;s command line that AFL will substitute with each input file name&lt;br&gt;
+@@是 AFL 将替换为每个输入文件名的目标命令行占位符&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;因此，基本上 fuzzer 将会运行这个命令&lt;code&gt;$HOME/fuzzing_xpdf/install/bin/pdftotext &amp;lt;input-file-name&amp;gt; $HOME/fuzzing_xpdf/output&lt;/code&gt; 对每个不同的输入文件&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Tips&lt;/strong&gt;：使用docker时需要额外使用&lt;code&gt;echo core &amp;gt; /proc/sys/kernel/core_pattern&lt;/code&gt;，是因为如果系统配置为将核心转储文件（core）通知发送到外部程序，将导致将崩溃信息发送到Fuzzer之间的延迟增大，进而可能将崩溃被误报为超时，所以得临时修改&lt;code&gt;core_pattern&lt;/code&gt;文件，这也是为何构建容器时使用&lt;code&gt;--privileged&lt;/code&gt;方便改写系统文件&lt;/p&gt;
+&lt;p&gt;![[Pasted image 20250419182502.png]]
+静待一段时间，等到出现crash
+![[Pasted image 20250419184614.png]]&lt;/p&gt;
+&lt;h3 id=&#34;练习题&#34;&gt;练习题
+&lt;/h3&gt;&lt;h4 id=&#34;重现crash&#34;&gt;重现crash
+&lt;/h4&gt;&lt;p&gt;先找到我们crash的文件所在地
+&lt;code&gt;$HOME/fuzzing_xpdf/install/bin/pdftotext  ./out/default/crashes/id\:000000\,sig\:11\,src\:000002\,time\:348479\,execs\:218044\,op\:havoc\,rep\:15&lt;/code&gt;
+执行我们引起crash的输入
+![[Pasted image 20250421200243.png]]&lt;/p&gt;
+&lt;h4 id=&#34;调试crash以找到问题所在的地方&#34;&gt;调试crash以找到问题所在的地方
+&lt;/h4&gt;&lt;p&gt;进入gdb（推荐可以使用pwngdb，但要注意寻找兼容Ubuntu20.04版本的）
+输入我们的crash，注意不要使用&lt;code&gt;&amp;lt;&lt;/code&gt;管道定向，保持源二进制文件的执行&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;pwndbg&amp;gt; run  ./out/default/crashes/id\:000000\,sig\:11\,src\:000002\,time\:348479\,execs\:218044\,op\:havoc\,rep\:15
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;尝试输入&lt;code&gt;bt&lt;/code&gt;发现栈追踪无限增长，&lt;del&gt;&lt;strong&gt;不能定位，于是另寻它路&lt;/strong&gt;&lt;/del&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;好吧，实际上这就是漏洞（无限递归）所在&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;![[Pasted image 20250421201349.png]]&lt;/p&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.cvedetails.com/cve/CVE-2019-13288/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://www.cvedetails.com/cve/CVE-2019-13288/&lt;/a&gt;
+![[Pasted image 20250421201500.png]]&lt;/p&gt;
+&lt;h4 id=&#34;修复问题&#34;&gt;修复问题
+&lt;/h4&gt;&lt;p&gt;通过bt直接定位到Parser.cc文件
+结合源码可以得知，是makestream后的shift函数又调用了getOBJ，而getobj又可以makestream，造成了三角循环，无限递归，导致报错&lt;/p&gt;
+&lt;p&gt;![[Pasted image 20250421210028.png]]
+最简单粗暴的方法就是修改掉三角循环中的一角，重新make就不会触发漏洞，但是需要考虑当原本程序执行逻辑恰当！！！&lt;/p&gt;
+&lt;p&gt;实际xpdf在4.02以后增加了递归次数的限制
+在会导致该三角循环的地方，增加了循环次数判断
+&lt;a class=&#34;link&#34; href=&#34;https://github.com/ashutoshvarma/libxpdf/blob/master/xpdf-4.02/xpdf/Parser.cc&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://github.com/ashutoshvarma/libxpdf/blob/master/xpdf-4.02/xpdf/Parser.cc&lt;/a&gt;
+![[Pasted image 20250421211011.png]]
+![[Pasted image 20250421211122.png]]&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>
